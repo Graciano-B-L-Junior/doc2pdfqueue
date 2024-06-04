@@ -1,0 +1,17 @@
+
+services:
+  auth:
+    build: ./auth
+    container_name: auth
+    ports:
+      - 80:5000
+    env_file:
+      - ./envFiles/.db.env
+      - ./envFiles/.env
+    depends_on:
+      - db
+  db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+      
