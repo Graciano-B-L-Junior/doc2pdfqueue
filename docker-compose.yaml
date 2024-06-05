@@ -3,6 +3,8 @@ services:
   auth:
     build: ./auth
     container_name: auth
+    volumes:
+      - ./auth:/app
     ports:
       - 80:5000
     env_file:
@@ -10,8 +12,21 @@ services:
       - ./envFiles/.env
     depends_on:
       - db
+      - jwt_service
   db:
     build:
       context: ./database
       dockerfile: Dockerfile
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  jwt_service:
+    build:
+      context: ./jwt_auth
+      dockerfile: Dockerfile
+    volumes:
+      - ./jwt_auth:/app
+    container_name: jwt
+    env_file:
+      - ./envFiles/.jwt.env
       

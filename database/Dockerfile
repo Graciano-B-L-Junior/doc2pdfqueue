@@ -1,5 +1,5 @@
-FROM postgres:bookworm
+FROM mysql:8
 
 COPY init.sql /docker-entrypoint-initdb.d/
 
-ENV POSTGRES_PASSWORD=example
+ENV MYSQL_ROOT_PASSWORD=example
