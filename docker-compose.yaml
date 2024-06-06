@@ -1,4 +1,3 @@
-
 services:
   auth:
     build: ./auth
@@ -10,9 +9,11 @@ services:
     env_file:
       - ./envFiles/.db.env
       - ./envFiles/.env
+      - ./envFiles/.rbmq.env
     depends_on:
       - db
       - jwt_service
+      - rabbitmq
   db:
     build:
       context: ./database
@@ -29,4 +30,31 @@ services:
     container_name: jwt
     env_file:
       - ./envFiles/.jwt.env
+
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      dockerfile: Dockerfile
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    env_file:
+      - ./envFiles/.rbmq.env
+    ports:
+      - 8080:15672
+
+  formatter:
+    restart: always
+    build:
+      context: ./formatter
+      dockerfile: Dockerfile
+    env_file:
+      - ./envFiles/.formatter.env
+    volumes:
+      - ./formatter:/app
+  
+
+volumes:
+  rabbitmq:
+    
+
       

@@ -7,11 +7,13 @@ from db_aux.db import get_user
 import requests
 import os
 from datetime import datetime, timedelta
+from queue_aux.queue import init_rabbitmq
 
 app = Flask(__name__)
 
 @app.route("/", methods=["GET","POST"])
 def init():
+    init_rabbitmq()
     if request.method == 'GET':
         return render_template('index.html',)
     elif request.method == 'POST':
