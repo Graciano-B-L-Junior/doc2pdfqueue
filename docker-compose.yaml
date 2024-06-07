@@ -37,13 +37,14 @@ services:
       dockerfile: Dockerfile
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    env_file:
-      - ./envFiles/.rbmq.env
+    # env_file:
+    #   - ./envFiles/.rbmq.env
     ports:
       - 8080:15672
+      - 5672:5672
+    container_name: rabbitmq
 
   formatter:
-    restart: always
     build:
       context: ./formatter
       dockerfile: Dockerfile
@@ -51,8 +52,8 @@ services:
       - ./envFiles/.formatter.env
     volumes:
       - ./formatter:/app
+    container_name: formatter
   
-
 volumes:
   rabbitmq:
     
