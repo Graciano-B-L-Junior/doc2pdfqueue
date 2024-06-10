@@ -17,7 +17,7 @@ def generate_jwt():
         payload={
             "id":id,
             "user":user,
-            "exp": datetime.now() + timedelta(seconds=10)
+            "exp": datetime.now() + timedelta(minutes=30)
         }
         encoded = jwt.encode(payload,key,algorithm="HS256")
         return encoded

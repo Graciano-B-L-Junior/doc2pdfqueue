@@ -1,4 +1,4 @@
-from flask import Flask, make_response
+from flask import Flask, make_response, flash
 from flask import render_template
 from flask import url_for
 from flask import request,redirect
@@ -8,12 +8,14 @@ import requests
 import os
 from datetime import datetime, timedelta
 from queue_aux.queue import init_rabbitmq
+from werkzeug.utils import secure_filename
+from aux.check_and_send_file import allowed_file, send_file_to_queue
 
 app = Flask(__name__)
+app.secret_key=os.environ.get('secret')
 
 @app.route("/", methods=["GET","POST"])
 def init():
-    init_rabbitmq()
     if request.method == 'GET':
         return render_template('index.html',)
     elif request.method == 'POST':
@@ -73,10 +75,43 @@ def service():
                 if request.method == 'GET':
                     return render_template('service.html')
                 elif request.method == 'POST':
-                    ...
+                    if 'doc' not in request.files:
+                        return make_response(
+                            render_template('service.html',error='Error: Any file uploaded')
+                        )
+                    file = request.files['doc']
+                    if file.filename == '':
+                        return make_response(
+                            render_template('service.html',error='Error: No file selected')
+                        )
+                    if file and allowed_file(file.filename):
+                        print(file)
+                        filename = secure_filename(file.filename)
+                        file.save(filename)
+                        message = send_file_to_queue(filename)
+                        flash(message)
+                        return redirect(url_for('download_pdf'))
+                    else:
+                        return make_response(
+                            render_template('service.html',error='Error: Filetype not allowed')
+                        )
                 else:
                     return render_template('service.html')
             else:
                 return redirect(url_for('init'))
         else:
             return redirect(url_for('init'))
+        
+@app.route("/download")
+def download_pdf():
+    if request.cookies.get('token_jwt'):
+        r = requests.post(f"http://{os.environ.get('JWT_SERVICE')}/verify_jwt",
+                        data={
+                            "token":request.cookies.get('token_jwt'),
+                        })
+        if r.text == "True":
+            return render_template('download.html')
+        else:
+            return redirect(url_for('init'))
+    else:
+        return redirect(url_for('init'))

@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doc 2 Pdf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <p>Hello World</p>
+    {% if error %}
+        <p>{{error}}</p>
+    {% endif %}
+    <form action="" method="post" enctype="multipart/form-data">
+        <input type="file" name="doc" id="doc">
+        <input type="submit" value="Upload">
+    </form>
 </body>
 </html>
