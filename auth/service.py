@@ -1,4 +1,4 @@
-from flask import Flask, make_response, flash
+from flask import Flask, make_response, flash, send_from_directory,send_file,abort
 from flask import render_template
 from flask import url_for
 from flask import request,redirect
@@ -7,7 +7,7 @@ from db_aux.db import get_user
 import requests
 import os
 from datetime import datetime, timedelta
-from queue_aux.queue import init_rabbitmq
+from queue_aux.queue import download_pdf_file
 from werkzeug.utils import secure_filename
 from aux.check_and_send_file import allowed_file, send_file_to_queue
 
@@ -85,9 +85,8 @@ def service():
                             render_template('service.html',error='Error: No file selected')
                         )
                     if file and allowed_file(file.filename):
-                        print(file)
                         filename = secure_filename(file.filename)
-                        file.save(filename)
+                        file.save(os.path.join('/app/files',filename))
                         message = send_file_to_queue(filename)
                         flash(message)
                         return redirect(url_for('download_pdf'))
@@ -115,3 +114,13 @@ def download_pdf():
             return redirect(url_for('init'))
     else:
         return redirect(url_for('init'))
+    
+@app.route("/file/<filename>")
+def archive(filename):
+    try:
+        file = '/app/files/'+filename
+        return send_file(file,as_attachment=True,download_name='your_pdf_file.pdf')
+    except Exception as err:
+        print(err)
+        return abort(404)
+

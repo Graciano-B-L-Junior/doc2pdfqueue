@@ -23,6 +23,26 @@ def connect_rabbitmq(retries=5, delay=2):
             sys.stdout.flush()
     raise Exception("Failed to connect to RabbitMQ after several retries")
 
+def send_pdf_file_to_queue():
+    try:
+        channel = connect_rabbitmq()
+        channel.queue_declare(queue='pdf_queue',durable=True)
+        
+
+        with open('file.pdf', 'rb') as file:
+            file_data = file.read()
+            channel.basic_publish(
+            exchange='',
+            routing_key='pdf_queue',
+            body=file_data,
+            properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent)
+            )
+
+        channel.close()
+        os.remove('file.pdf')
+    except Exception as err:
+        print(err)
+
 def convert_file_from_queue():
     channel = connect_rabbitmq()
     channel.queue_declare(queue='file',durable=True)
@@ -38,7 +58,7 @@ def convert_file_from_queue():
         document.Close()
         os.remove(doc_name)
         ch.basic_ack(delivery_tag=method.delivery_tag)
-
+        send_pdf_file_to_queue()
 
 
 
@@ -49,8 +69,6 @@ def convert_file_from_queue():
     channel.start_consuming()
 
     channel.close()
-
-
 
 
 def main():
