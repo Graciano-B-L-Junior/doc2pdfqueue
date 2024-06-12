@@ -1,5 +1,6 @@
 import pika
 import os
+import time
 
 
 
@@ -55,11 +56,10 @@ def download_pdf_file():
 
 
     channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(queue='pdf_queue', on_message_callback=callback)
+    channel.basic_consume(queue='pdf_queue', on_message_callback=callback,consumer_tag="tag")
 
     print(' [*] Waiting for pdf file. To exit press CTRL+C')
     channel.start_consuming()
 
     channel.close()
     conn.close()
-    return

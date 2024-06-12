@@ -2,7 +2,8 @@ $(document).ready(()=>{
 
     let attemps = 0
 
-    $.ajax({
+    setTimeout(()=>{
+      $.ajax({
         url: '/file/file.pdf',
         method: 'GET',
         xhrFields :{
@@ -20,6 +21,6 @@ $(document).ready(()=>{
             attemps=4
           }
         })
-
+    },5000)
    
   })

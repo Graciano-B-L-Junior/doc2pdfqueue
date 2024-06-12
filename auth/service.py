@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from queue_aux.queue import download_pdf_file
 from werkzeug.utils import secure_filename
 from aux.check_and_send_file import allowed_file, send_file_to_queue
+import threading
 
 app = Flask(__name__)
 app.secret_key=os.environ.get('secret')
@@ -119,6 +120,8 @@ def download_pdf():
 def archive(filename):
     try:
         file = '/app/files/'+filename
+        th = threading.Thread(target=download_pdf_file)
+        th.start()
         return send_file(file,as_attachment=True,download_name='your_pdf_file.pdf')
     except Exception as err:
         print(err)
